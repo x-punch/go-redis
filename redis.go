@@ -10,6 +10,9 @@ import (
 	"github.com/go-redis/redis"
 )
 
+// ErrKeyNotExist reply Redis returns when key does not exist.
+const ErrKeyNotExist = redis.Nil
+
 // redisService represents cache service build on redis
 type redisService struct {
 	config *Config
@@ -28,12 +31,16 @@ func NewService(config *Config) Service {
 }
 
 // GetBytes search given key in cache then return received reply
-func (s *redisService) GetBytes(key string) (reply []byte, err error) {
-	return s.client.Get(key).Bytes()
+func (s *redisService) GetBytes(key string) ([]byte, error) {
+	bytes, err := s.client.Get(key).Bytes()
+	if err == redis.Nil {
+		return nil, ErrKeyNotExist
+	}
+	return bytes, err
 }
 
 // FindBytes search given key in cache then return received reply
-func (s *redisService) FindBytes(key string) (reply []byte, err error) {
+func (s *redisService) FindBytes(key string) ([]byte, error) {
 	bytes, err := s.client.Get(key).Bytes()
 	if err == redis.Nil {
 		return nil, nil
@@ -42,17 +49,21 @@ func (s *redisService) FindBytes(key string) (reply []byte, err error) {
 }
 
 // GetString search given key in cache then return reply in string
-func (s *redisService) GetString(key string) (reply string, err error) {
-	return s.client.Get(key).Result()
+func (s *redisService) GetString(key string) (string, error) {
+	str, err := s.client.Get(key).Result()
+	if err == redis.Nil {
+		return "", ErrKeyNotExist
+	}
+	return str, err
 }
 
 // FindString search given key in cache then return reply in string
-func (s *redisService) FindString(key string) (reply string, err error) {
-	val, err := s.client.Get(key).Result()
+func (s *redisService) FindString(key string) (string, error) {
+	str, err := s.client.Get(key).Result()
 	if err == redis.Nil {
 		return "", nil
 	}
-	return val, err
+	return str, err
 }
 
 // Set given key with value in cache within given expired time
