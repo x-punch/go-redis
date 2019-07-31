@@ -79,10 +79,13 @@ func (s *redisService) Delete(key string) error {
 // Exists check given key whether exist in cache
 func (s *redisService) Exists(key string) (bool, error) {
 	_, err := s.client.Get(key).Result()
-	if err == redis.Nil {
-		return true, nil
+	if err != nil {
+		if err == redis.Nil {
+			return false, nil
+		}
+		return false, err
 	}
-	return false, err
+	return true, nil
 }
 
 // Subscribe the client to the specified channels. It returns
