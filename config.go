@@ -9,10 +9,10 @@ type Config struct {
 }
 
 // NewConfig builds a new configuration with default values.
-func NewConfig() *Config {
-	return &Config{
+func NewConfig() Config {
+	return Config{
 		Network:  "tcp",
-		Address:  "127.0.0.1:6379",
+		Address:  ":6379",
 		Password: "",
 		DB:       1,
 	}

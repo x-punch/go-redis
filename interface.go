@@ -23,18 +23,28 @@ type Service interface {
 	// Set given key with value in cache within given expired time
 	Set(key string, value []byte, expiration time.Duration) error
 
-	// Delete given key in cache
+	// Expire Set a key's time to live in seconds
+	Expire(key string, expiration time.Duration) (bool, error)
+
+	// ExpireAt Set the expiration for a key as a UNIX timestamp
+	ExpireAt(key string, expiration time.Time) (bool, error)
+
+	// Delete Delete a key
 	Delete(key string) error
 
-	// Exists check given key whether exist in cache
+	// Exists Determine if a key exists
 	Exists(key string) (bool, error)
 
-	// Subscribe the client to the specified channels. It returns
-	// empty subscription if there are no channels.
+	//Keys Find all keys matching the given pattern
+	Keys(pattern string) ([]string, error)
+
+	// Scan Incrementally iterate the keys space
+	Scan(cursor uint64, match string, count int64) ([]string, error)
+
+	// Subscribe Listen for messages published to the given channels
 	Subscribe(channels ...string) (*redis.PubSub, error)
 
-	// PSubscribe the client to the given patterns. It returns
-	// empty subscription if there are no patterns.
+	// PSubscribe Listen for messages published to channels matching the given patterns
 	PSubscribe(patterns ...string) (*redis.PubSub, error)
 
 	// SubscribeExpired the client to the specified channels. It returns
