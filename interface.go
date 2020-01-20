@@ -39,7 +39,7 @@ type Service interface {
 	Keys(pattern string) ([]string, error)
 
 	// Scan Incrementally iterate the keys space
-	Scan(cursor uint64, match string, count int64) ([]string, error)
+	Scan(cursor uint64, match string, count int64) ([]string, uint64, error)
 
 	// Subscribe Listen for messages published to the given channels
 	Subscribe(channels ...string) (*redis.PubSub, error)

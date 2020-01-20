@@ -70,14 +70,11 @@ func (s *redisService) Delete(key string) error {
 }
 
 func (s *redisService) Exists(key string) (bool, error) {
-	_, err := s.client.Get(key).Result()
+	count, err := s.client.Exists(key).Result()
 	if err != nil {
-		if err == redis.Nil {
-			return false, nil
-		}
 		return false, err
 	}
-	return true, nil
+	return count > 0, nil
 }
 
 func (s *redisService) Expire(key string, expiration time.Duration) (bool, error) {
@@ -92,16 +89,8 @@ func (s *redisService) Keys(pattern string) ([]string, error) {
 	return s.client.Keys(pattern).Result()
 }
 
-func (s *redisService) Scan(cursor uint64, match string, count int64) ([]string, error) {
-	iter := s.client.Scan(cursor, match, count).Iterator()
-	result := []string{}
-	for iter.Next() {
-		result = append(result, iter.Val())
-	}
-	if err := iter.Err(); err != nil {
-		return nil, err
-	}
-	return result, nil
+func (s *redisService) Scan(cursor uint64, match string, count int64) ([]string, uint64, error) {
+	return s.client.Scan(cursor, match, count).Result()
 }
 
 func (s *redisService) Subscribe(channels ...string) (*redis.PubSub, error) {
