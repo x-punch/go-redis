@@ -2,10 +2,10 @@ package redis
 
 // Config represents the mongo configuration.
 type Config struct {
-	Network  string
-	Address  string
-	Password string
-	DB       int
+	Network  string `toml:"network"`
+	Address  string `toml:"address"`
+	Password string `toml:"password"`
+	DB       int    `toml:"db"`
 }
 
 // NewConfig builds a new configuration with default values.
