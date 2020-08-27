@@ -30,7 +30,7 @@ func NewService(config Config) Service {
 	return &redisService{config, client}
 }
 
-func (s *redisService) GetClient() *redis.Client {
+func (s *redisService) Client() *redis.Client {
 	return s.client
 }
 
