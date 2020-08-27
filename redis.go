@@ -4,10 +4,11 @@ Package redis implements a simple cache management library base on redis
 package redis
 
 import (
+	"context"
 	"strconv"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
 
 // ErrKeyNotExist reply Redis returns when key does not exist.
@@ -29,88 +30,88 @@ func NewService(config Config) Service {
 	return &redisService{config, client}
 }
 
-func (s *redisService) GetBytes(key string) ([]byte, error) {
-	bytes, err := s.client.Get(key).Bytes()
+func (s *redisService) GetBytes(ctx context.Context, key string) ([]byte, error) {
+	bytes, err := s.client.Get(ctx, key).Bytes()
 	if err == redis.Nil {
 		return nil, ErrKeyNotExist
 	}
 	return bytes, err
 }
 
-func (s *redisService) FindBytes(key string) ([]byte, error) {
-	bytes, err := s.client.Get(key).Bytes()
+func (s *redisService) FindBytes(ctx context.Context, key string) ([]byte, error) {
+	bytes, err := s.client.Get(ctx, key).Bytes()
 	if err == redis.Nil {
 		return nil, nil
 	}
 	return bytes, err
 }
 
-func (s *redisService) GetString(key string) (string, error) {
-	str, err := s.client.Get(key).Result()
+func (s *redisService) GetString(ctx context.Context, key string) (string, error) {
+	str, err := s.client.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return "", ErrKeyNotExist
 	}
 	return str, err
 }
 
-func (s *redisService) FindString(key string) (string, error) {
-	str, err := s.client.Get(key).Result()
+func (s *redisService) FindString(ctx context.Context, key string) (string, error) {
+	str, err := s.client.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return "", nil
 	}
 	return str, err
 }
 
-func (s *redisService) Set(key string, value []byte, expiration time.Duration) error {
-	return s.client.Set(key, value, expiration).Err()
+func (s *redisService) Set(ctx context.Context, key string, value []byte, expiration time.Duration) error {
+	return s.client.Set(ctx, key, value, expiration).Err()
 }
 
-func (s *redisService) Delete(key string) error {
-	return s.client.Del(key).Err()
+func (s *redisService) Delete(ctx context.Context, key string) error {
+	return s.client.Del(ctx, key).Err()
 }
 
-func (s *redisService) Exists(key string) (bool, error) {
-	count, err := s.client.Exists(key).Result()
+func (s *redisService) Exists(ctx context.Context, key string) (bool, error) {
+	count, err := s.client.Exists(ctx, key).Result()
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
 }
 
-func (s *redisService) Expire(key string, expiration time.Duration) (bool, error) {
-	return s.client.Expire(key, expiration).Result()
+func (s *redisService) Expire(ctx context.Context, key string, expiration time.Duration) (bool, error) {
+	return s.client.Expire(ctx, key, expiration).Result()
 }
 
-func (s *redisService) ExpireAt(key string, tm time.Time) (bool, error) {
-	return s.client.ExpireAt(key, tm).Result()
+func (s *redisService) ExpireAt(ctx context.Context, key string, tm time.Time) (bool, error) {
+	return s.client.ExpireAt(ctx, key, tm).Result()
 }
 
-func (s *redisService) Keys(pattern string) ([]string, error) {
-	return s.client.Keys(pattern).Result()
+func (s *redisService) Keys(ctx context.Context, pattern string) ([]string, error) {
+	return s.client.Keys(ctx, pattern).Result()
 }
 
-func (s *redisService) Scan(cursor uint64, match string, count int64) ([]string, uint64, error) {
-	return s.client.Scan(cursor, match, count).Result()
+func (s *redisService) Scan(ctx context.Context, cursor uint64, match string, count int64) ([]string, uint64, error) {
+	return s.client.Scan(ctx, cursor, match, count).Result()
 }
 
-func (s *redisService) Subscribe(channels ...string) (*redis.PubSub, error) {
-	pubsub := s.client.Subscribe(channels...)
-	_, err := pubsub.Receive()
+func (s *redisService) Subscribe(ctx context.Context, channels ...string) (*redis.PubSub, error) {
+	pubsub := s.client.Subscribe(ctx, channels...)
+	_, err := pubsub.Receive(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return pubsub, nil
 }
 
-func (s *redisService) PSubscribe(channels ...string) (*redis.PubSub, error) {
-	pubsub := s.client.PSubscribe(channels...)
-	_, err := pubsub.Receive()
+func (s *redisService) PSubscribe(ctx context.Context, channels ...string) (*redis.PubSub, error) {
+	pubsub := s.client.PSubscribe(ctx, channels...)
+	_, err := pubsub.Receive(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return pubsub, nil
 }
 
-func (s *redisService) SubscribeExpired() (*redis.PubSub, error) {
-	return s.Subscribe("__keyevent@" + strconv.Itoa(s.config.DB) + "__:expired")
+func (s *redisService) SubscribeExpired(ctx context.Context) (*redis.PubSub, error) {
+	return s.Subscribe(ctx, "__keyevent@"+strconv.Itoa(s.config.DB)+"__:expired")
 }

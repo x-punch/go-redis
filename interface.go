@@ -1,53 +1,54 @@
 package redis
 
 import (
+	"context"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
 
 // Service reprsents redis cache service
 type Service interface {
 	// GetBytes search given key in cache then return received reply
-	GetBytes(key string) (reply []byte, err error)
+	GetBytes(ctx context.Context, key string) (reply []byte, err error)
 
 	// FindBytes search given key in cache then return received reply
-	FindBytes(key string) (reply []byte, err error)
+	FindBytes(ctx context.Context, key string) (reply []byte, err error)
 
 	// GetString search given key in cache then return reply in string
-	GetString(key string) (reply string, err error)
+	GetString(ctx context.Context, key string) (reply string, err error)
 
 	// FindString search given key in cache then return reply in string
-	FindString(key string) (reply string, err error)
+	FindString(ctx context.Context, key string) (reply string, err error)
 
 	// Set given key with value in cache within given expired time
-	Set(key string, value []byte, expiration time.Duration) error
+	Set(ctx context.Context, key string, value []byte, expiration time.Duration) error
 
 	// Expire Set a key's time to live in seconds
-	Expire(key string, expiration time.Duration) (bool, error)
+	Expire(ctx context.Context, key string, expiration time.Duration) (bool, error)
 
 	// ExpireAt Set the expiration for a key as a UNIX timestamp
-	ExpireAt(key string, expiration time.Time) (bool, error)
+	ExpireAt(ctx context.Context, key string, expiration time.Time) (bool, error)
 
 	// Delete Delete a key
-	Delete(key string) error
+	Delete(ctx context.Context, key string) error
 
 	// Exists Determine if a key exists
-	Exists(key string) (bool, error)
+	Exists(ctx context.Context, key string) (bool, error)
 
 	//Keys Find all keys matching the given pattern
-	Keys(pattern string) ([]string, error)
+	Keys(ctx context.Context, pattern string) ([]string, error)
 
 	// Scan Incrementally iterate the keys space
-	Scan(cursor uint64, match string, count int64) ([]string, uint64, error)
+	Scan(ctx context.Context, cursor uint64, match string, count int64) ([]string, uint64, error)
 
 	// Subscribe Listen for messages published to the given channels
-	Subscribe(channels ...string) (*redis.PubSub, error)
+	Subscribe(ctx context.Context, channels ...string) (*redis.PubSub, error)
 
 	// PSubscribe Listen for messages published to channels matching the given patterns
-	PSubscribe(patterns ...string) (*redis.PubSub, error)
+	PSubscribe(ctx context.Context, patterns ...string) (*redis.PubSub, error)
 
 	// SubscribeExpired the client to the specified channels. It returns
 	// empty subscription if there are no channels.
-	SubscribeExpired() (*redis.PubSub, error)
+	SubscribeExpired(ctx context.Context) (*redis.PubSub, error)
 }
