@@ -30,6 +30,10 @@ func NewService(config Config) Service {
 	return &redisService{config, client}
 }
 
+func (s *redisService) GetClient() *redis.Client {
+	return s.client
+}
+
 func (s *redisService) GetBytes(ctx context.Context, key string) ([]byte, error) {
 	bytes, err := s.client.Get(ctx, key).Bytes()
 	if err == redis.Nil {

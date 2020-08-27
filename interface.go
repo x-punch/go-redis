@@ -9,6 +9,9 @@ import (
 
 // Service reprsents redis cache service
 type Service interface {
+	// GetClient will return redis client
+	GetClient() *redis.Client
+
 	// GetBytes search given key in cache then return received reply
 	GetBytes(ctx context.Context, key string) (reply []byte, err error)
 
