@@ -14,6 +14,6 @@ func NewConfig() Config {
 		Network:  "tcp",
 		Address:  ":6379",
 		Password: "",
-		DB:       1,
+		DB:       0,
 	}
 }
