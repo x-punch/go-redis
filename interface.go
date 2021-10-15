@@ -9,6 +9,9 @@ import (
 
 // Service reprsents redis cache service
 type Service interface {
+	// Client will return redis client
+	Client() *redis.Client
+
 	// GetBytes search given key in cache then return received reply
 	GetBytes(ctx context.Context, key string) (reply []byte, err error)
 
@@ -100,4 +103,11 @@ type Service interface {
 	// SubscribeExpired the client to the specified channels. It returns
 	// empty subscription if there are no channels.
 	SubscribeExpired(ctx context.Context) (*redis.PubSub, error)
+
+	Do(ctx context.Context, args ...interface{}) *redis.Cmd
+
+	Eval(ctx context.Context, script string, keys []string, args ...interface{}) *redis.Cmd
+	EvalSha(ctx context.Context, sha1 string, keys []string, args ...interface{}) *redis.Cmd
+	ScriptExists(ctx context.Context, hashes ...string) *redis.BoolSliceCmd
+	ScriptLoad(ctx context.Context, script string) *redis.StringCmd
 }

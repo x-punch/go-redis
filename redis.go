@@ -5,7 +5,6 @@ package redis
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -28,6 +27,10 @@ func NewService(config Config) Service {
 		DB:       config.DB,
 	})
 	return &redisService{config, client}
+}
+
+func (s *redisService) Client() *redis.Client {
+	return s.client
 }
 
 func (s *redisService) Del(ctx context.Context, key string) error {
@@ -66,24 +69,6 @@ func (s *redisService) Scan(ctx context.Context, cursor uint64, match string, co
 	return s.client.Scan(ctx, cursor, match, count).Result()
 }
 
-func (s *redisService) Subscribe(ctx context.Context, channels ...string) (*redis.PubSub, error) {
-	pubsub := s.client.Subscribe(ctx, channels...)
-	_, err := pubsub.Receive(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return pubsub, nil
-}
-
-func (s *redisService) PSubscribe(ctx context.Context, channels ...string) (*redis.PubSub, error) {
-	pubsub := s.client.PSubscribe(ctx, channels...)
-	_, err := pubsub.Receive(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return pubsub, nil
-}
-
-func (s *redisService) SubscribeExpired(ctx context.Context) (*redis.PubSub, error) {
-	return s.Subscribe(ctx, "__keyevent@"+strconv.Itoa(s.config.DB)+"__:expired")
+func (s *redisService) Do(ctx context.Context, args ...interface{}) *redis.Cmd {
+	return s.client.Do(ctx, args...)
 }
